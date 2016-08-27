@@ -1,0 +1,22 @@
+version: '2'
+services:
+  php-5.5:
+    build: ./php-5.5
+    volumes:
+      - ./app:/app
+      - ./_include/entrypoint.sh:/app/entrypoint.sh
+  php-5.6:
+    build: ./php-5.6
+    volumes:
+      - ./app:/app
+      - ./_include/entrypoint.sh:/app/entrypoint.sh
+  php-7.0:
+    build: ./php-7.0
+    volumes:
+      - ./app:/app
+      - ./_include/entrypoint.sh:/app/entrypoint.sh
+  hhvm:
+    build: ./hhvm
+    volumes:
+      - ./app:/app
+      - ./_include/entrypoint.sh:/app/entrypoint.sh
