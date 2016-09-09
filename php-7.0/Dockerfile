@@ -1,5 +1,4 @@
 FROM php:7.0-alpine
-RUN apk add --update bash && rm -rf /var/cache/apk/*
 
 # Uncomment the furhter line to add needed extension(s)
 # RUN docker-php-ext-install iconv
@@ -9,4 +8,3 @@ RUN apk add --update bash && rm -rf /var/cache/apk/*
 
 VOLUME ["/app"]
 WORKDIR /app
-ENTRYPOINT ["/app/entrypoint.sh"]
