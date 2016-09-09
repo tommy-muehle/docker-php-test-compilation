@@ -1,5 +1,6 @@
 # docker-php-test-compilation
-Run tests or checks in various PHP versions. No matter which testing framework are used.
+
+Run any checks in various PHP versions.
 
 ## Requirements
 
