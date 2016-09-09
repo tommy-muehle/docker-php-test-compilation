@@ -1,57 +1,61 @@
 #!/usr/bin/env bash
 
-set -e
+print_task() {
+    printf "%-80s" "${1}"
+    return 0
+}
 
-DEBUG=0
-ARGUMENTS=""
+print_info() {
+    STATUS="[ INFO ]";
+    COLOR="\x1b[36;01m";
+    COLOR_RESET="\x1b[39;49;00m"
 
-for i in "$@"
+    print_task "${1}"
+    echo -e "${COLOR}${STATUS}${COLOR_RESET}"
+    return 0
+}
+
+print_ok() {
+    STATUS="[  OK  ]";
+    COLOR="\x1b[33;32m";
+    COLOR_RESET="\x1b[39;49;00m"
+
+    echo -e "${COLOR}${STATUS}${COLOR_RESET}"
+    return 0
+}
+
+print_fail() {
+    STATUS="[ FAIL ]";
+    COLOR="\x1b[31;31m";
+    COLOR_RESET="\x1b[39;49;00m"
+
+    echo -e "${COLOR}${STATUS}${COLOR_RESET}"
+    printf "%-80s" "${1}"
+    echo -e "${COLOR}${STATUS}${COLOR_RESET}"
+    return 0
+}
+
+execute() {
+    OUTPUT=`${1} &>/dev/null`
+    if [ ! "$?" == 0 ]; then
+      print_fail "Failed command: $1"
+      exit 1
+    fi
+    print_ok
+}
+
+docker-compose build &>/dev/null
+docker-compose up -d &>/dev/null
+
+VERSIONS=( "php-5.5" "php-5.6" "php-7.0" "php-7.1" "hhvm" )
+for VERSION in "${VERSIONS[@]}"
 do
-case $i in
-    --debug)
-    DEBUG=1
-    shift
-    ;;
-    --command=*)
-    ARGUMENTS="${i#*=}"
-    shift
-    ;;
-    *)
-    ;;
-esac
+    printf "\033c"
+    print_info "Run checks with PHP $(docker-compose run $VERSION php -r 'echo phpversion();')"
+
+    # print_task "Run tests"
+    # execute "docker-compose run $VERSION php bin/phpunit.phar"
 done
 
-if [ $DEBUG -eq 0 ]; then
-    docker-compose build &>/dev/null
-    docker-compose up -d &>/dev/null
-else
-    docker-compose build
-    docker-compose up -d
-fi
-
-if [ -z "$ARGUMENTS" ]; then
-    printf "\033c"
-    echo -e "Type the command to run your tests in different PHP versions, followed by [ENTER]:"
-    echo -e "For example: 'phpunit.phar -c app/phpunit.xml'\n"
-    read ARGUMENTS
-fi
-
-printf "\033c"
-echo "Run tests for PHP 5.5 ..."
-docker-compose run php-5.5 php -v
-docker-compose run php-5.5 php $ARGUMENTS
-
-printf "\033c"
-echo "Run tests for PHP 5.6 ..."
-docker-compose run php-5.6 php -v
-docker-compose run php-5.6 php $ARGUMENTS
-
-printf "\033c"
-echo "Run tests for PHP 7.0 ..."
-docker-compose run php-7.0 php -v
-docker-compose run php-7.0 php $ARGUMENTS
-
-printf "\033c"
-echo "Run tests for HHVM ..."
-docker-compose run hhvm php -v
-docker-compose run hhvm php $ARGUMENTS
+docker-compose stop &>/dev/null
+docker-compose rm -f &>/dev/null
